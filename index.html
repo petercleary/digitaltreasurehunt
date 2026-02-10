@@ -3,28 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Scavenger Hunt Pro</title>
+    <title>Urban Quest Pro</title>
     <style>
         :root { --primary: #6366f1; --success: #22c55e; --warning: #f59e0b; --bg: #0f172a; --card-bg: #1e293b; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: system-ui, sans-serif; background: var(--bg); color: #f8fafc; padding: 15px; }
         .container { max-width: 500px; margin: 0 auto; }
-        h1 { text-align: center; margin-bottom: 20px; font-weight: 800; }
-        .card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        input[type="text"] { width: 100%; padding: 12px; background: #334155; border: 1px solid #475569; border-radius: 8px; color: white; font-size: 16px; margin-bottom: 10px; }
+        .card, .item { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        input[type="text"] { width: 100%; padding: 12px; background: #334155; border: 1px solid #475569; border-radius: 8px; color: white; margin-bottom: 10px; }
         .timer { font-size: 2.5rem; text-align: center; font-family: monospace; margin: 10px 0; color: #94a3b8; }
         .timer.on { color: var(--success); }
         .btns { display: flex; gap: 10px; }
         .btns button { flex: 1; padding: 12px; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; }
-        .green { background: var(--success); }
-        .orange { background: var(--warning); }
-        .leaderboard { display: none; margin-top: 10px; border-top: 1px solid #334155; padding-top: 10px; }
-        .lb-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 0.9rem; }
-        .item { background: var(--card-bg); border-radius: 16px; margin-bottom: 15px; padding: 15px; border: 2px solid transparent; }
+        .prog-bar { height: 10px; background: #334155; border-radius: 5px; margin-top: 15px; overflow: hidden; }
+        .prog-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
+        .item { border: 2px solid transparent; transition: 0.3s; }
         .item.done { border-color: var(--success); }
-        .item-top { display: flex; align-items: center; gap: 12px; }
-        .name { flex: 1; font-weight: 600; }
-        .photo-box img { width: 100%; border-radius: 10px; margin-top: 15px; display: none; }
+        .item-top { display: flex; align-items: center; justify-content: space-between; }
+        .photo-preview { width: 100%; border-radius: 10px; margin-top: 15px; display: none; border: 1px solid #475569; }
         .take-btn { display: block; width: 100%; padding: 12px; background: var(--primary); color: white; text-align: center; border-radius: 10px; margin-top: 15px; cursor: pointer; font-weight: bold; }
         .share-btn { width: 100%; padding: 16px; background: #25D366; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     </style>
@@ -33,32 +29,29 @@
 <div class="container">
     <h1>📸 Urban Quest</h1>
     <div class="card">
-        <input type="text" id="uname" placeholder="Enter Your Name...">
+        <input type="text" id="uname" placeholder="Explorer Name...">
         <div class="timer" id="timer">00:00:00</div>
         <div class="btns">
-            <button class="green" id="startB" onclick="tStart()">▶ Start</button>
-            <button class="orange" id="stopB" onclick="tStop()" disabled>⏹ Finish</button>
+            <button style="background:var(--success)" id="startB" onclick="tStart()">▶ Start</button>
+            <button style="background:var(--warning)" id="stopB" onclick="tStop()" disabled>⏹ Finish</button>
         </div>
-        <div id="lbCard" class="leaderboard">
-            <h4 style="color:var(--warning)">🏆 Top 5 Leaderboard</h4>
-            <div id="lbContent"></div>
-        </div>
+        <div class="prog-bar"><div id="pfill" class="prog-fill"></div></div>
+        <p id="ptext" style="text-align:center; font-size:0.8rem; margin-top:5px;">Progress: 0/7</p>
     </div>
 
-    <div class="item" id="it1"><div class="item-top"><span>🖥️</span><span class="name">Digital Kiosk</span></div><img id="pimg1"><label class="take-btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="handleF(this,1)"></label></div>
-    <div class="item" id="it2"><div class="item-top"><span>🔌</span><span class="name">Public USB</span></div><img id="pimg2"><label class="take-btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="handleF(this,2)"></label></div>
-    <div class="item" id="it3"><div class="item-top"><span>💳</span><span class="name">Contactless Payment</span></div><img id="pimg3"><label class="take-btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="handleF(this,3)"></label></div>
-    <div class="item" id="it4"><div class="item-top"><span>📢</span><span class="name">Outdoor Billboard</span></div><img id="pimg4"><label class="take-btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="handleF(this,4)"></label></div>
-    <div class="item" id="it5"><div class="item-top"><span>⏰</span><span class="name">Selfie with a Clock</span></div><img id="pimg5"><label class="take-btn">📷 Snap<input type="file" hidden accept="image/*" capture="user" onchange="handleF(this,5)"></label></div>
-    <div class="item" id="it6"><div class="item-top"><span>📶</span><span class="name">Free WiFi</span></div><img id="pimg6"><label class="take-btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="handleF(this,6)"></label></div>
-    <div class="item" id="it7"><div class="item-top"><span>🛒</span><span class="name">Grocery Barcode</span></div><img id="pimg7"><label class="take-btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="handleF(this,7)"></label></div>
+    <div class="item" id="it1"><div class="item-top"><span>🖥️ Digital Kiosk</span><span id="chk1">⭕</span></div><img id="img1" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="environment" onchange="processFile(this, 1)"></label></div>
+    <div class="item" id="it2"><div class="item-top"><span>🔌 Public USB</span><span id="chk2">⭕</span></div><img id="img2" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="environment" onchange="processFile(this, 2)"></label></div>
+    <div class="item" id="it3"><div class="item-top"><span>💳 Contactless Payment</span><span id="chk3">⭕</span></div><img id="img3" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="environment" onchange="processFile(this, 3)"></label></div>
+    <div class="item" id="it4"><div class="item-top"><span>📢 Outdoor Billboard</span><span id="chk4">⭕</span></div><img id="img4" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="environment" onchange="processFile(this, 4)"></label></div>
+    <div class="item" id="it5"><div class="item-top"><span>⏰ Selfie with Clock</span><span id="chk5">⭕</span></div><img id="img5" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="user" onchange="processFile(this, 5)"></label></div>
+    <div class="item" id="it6"><div class="item-top"><span>📶 Free WiFi</span><span id="chk6">⭕</span></div><img id="img6" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="environment" onchange="processFile(this, 6)"></label></div>
+    <div class="item" id="it7"><div class="item-top"><span>🛒 Grocery Barcode</span><span id="chk7">⭕</span></div><img id="img7" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="environment" onchange="processFile(this, 7)"></label></div>
 
-    <button class="share-btn" onclick="shareWA()">📤 Share Results to WhatsApp</button>
+    <button class="share-btn" onclick="sendWhatsApp()">📤 Share to WhatsApp</button>
 </div>
 
 <script>
-    let seconds = 0, timerInterval = null, completed = {};
-    window.onload = showLB;
+    let seconds = 0, timerInterval = null, itemsFound = new Set();
 
     function tStart() {
         if (timerInterval) return;
@@ -67,47 +60,47 @@
         document.getElementById('stopB').disabled = false;
         timerInterval = setInterval(() => {
             seconds++;
-            document.getElementById('timer').textContent = new Date(seconds * 1000).toISOString().substr(11, 8);
+            let h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+            let m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+            let s = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer').textContent = `${h}:${m}:${s}`;
         }, 1000);
     }
 
     function tStop() {
         clearInterval(timerInterval);
         timerInterval = null;
-        const name = document.getElementById('uname').value || "Anonymous";
-        let scores = JSON.parse(localStorage.getItem('huntScores') || '[]');
-        scores.push({ name, time: seconds });
-        scores.sort((a, b) => a.time - b.time);
-        localStorage.setItem('huntScores', JSON.stringify(scores.slice(0, 5)));
-        showLB();
+        alert("Finish! Time: " + document.getElementById('timer').textContent);
     }
 
-    function showLB() {
-        const scores = JSON.parse(localStorage.getItem('huntScores') || '[]');
-        if (scores.length > 0) {
-            document.getElementById('lbCard').style.display = 'block';
-            document.getElementById('lbContent').innerHTML = scores.map((s, i) => 
-                `<div class="lb-row"><span>${i+1}. ${s.name}</span><span>${Math.floor(s.time/60)}m ${s.time%60}s</span></div>`
-            ).join('');
+    function processFile(input, id) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Display the image
+                const imgDisplay = document.getElementById(`img${id}`);
+                imgDisplay.src = e.target.result;
+                imgDisplay.style.display = 'block';
+                
+                // Update UI and Tracking
+                document.getElementById(`it${id}`).classList.add('done');
+                document.getElementById(`chk${id}`).textContent = '✅';
+                itemsFound.add(id);
+                
+                // Update Progress Bar
+                const count = itemsFound.size;
+                document.getElementById('pfill').style.width = (count / 7 * 100) + '%';
+                document.getElementById('ptext').textContent = `Progress: ${count}/7`;
+            };
+            reader.readAsDataURL(input.files[0]);
         }
     }
 
-    function handleF(input, id) {
-        if (input.files[0]) {
-            const img = document.getElementById(`pimg${id}`);
-            img.src = URL.createObjectURL(input.files[0]);
-            img.style.display = 'block';
-            document.getElementById(`it${id}`).classList.add('done');
-            completed[id] = true;
-        }
-    }
-
-    function shareWA() {
+    function sendWhatsApp() {
         const name = document.getElementById('uname').value || "Explorer";
         const time = document.getElementById('timer').textContent;
-        const count = Object.keys(completed).length;
-        const text = `🎯 *Urban Quest Complete!*\n👤 Name: ${name}\n⏱ Time: ${time}\n✅ Found: ${count}/7 items`;
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+        const msg = `🎯 *Urban Quest Update!*\n👤 Name: ${name}\n⏱ Time: ${time}\n✅ Found: ${itemsFound.size}/7 items.`;
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
     }
 </script>
 </body>

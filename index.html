@@ -3,104 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urban Quest Pro</title>
+    <title>Scavenger Hunt Pro</title>
     <style>
-        :root { --primary: #6366f1; --success: #22c55e; --warning: #f59e0b; --bg: #0f172a; --card-bg: #1e293b; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: system-ui, sans-serif; background: var(--bg); color: #f8fafc; padding: 15px; }
+        :root { --primary: #6366f1; --success: #22c55e; --bg: #0f172a; --card: #1e293b; }
+        body { font-family: sans-serif; background: var(--bg); color: #f8fafc; padding: 15px; margin: 0; }
         .container { max-width: 500px; margin: 0 auto; }
-        .card, .item { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        input[type="text"] { width: 100%; padding: 12px; background: #334155; border: 1px solid #475569; border-radius: 8px; color: white; margin-bottom: 10px; }
-        .timer { font-size: 2.5rem; text-align: center; font-family: monospace; margin: 10px 0; color: #94a3b8; }
-        .timer.on { color: var(--success); }
-        .btns { display: flex; gap: 10px; }
-        .btns button { flex: 1; padding: 12px; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; }
-        .prog-bar { height: 10px; background: #334155; border-radius: 5px; margin-top: 15px; overflow: hidden; }
-        .prog-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
-        .item { border: 2px solid transparent; transition: 0.3s; }
+        .card { background: var(--card); border-radius: 15px; padding: 20px; margin-bottom: 15px; text-align: center; }
+        .timer { font-size: 2.5rem; font-family: monospace; margin: 10px 0; color: #94a3b8; }
+        .prog-bar { height: 12px; background: #334155; border-radius: 6px; overflow: hidden; margin: 10px 0; }
+        .fill { height: 100%; background: var(--primary); width: 0%; transition: 0.3s; }
+        .item { background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 2px solid transparent; }
         .item.done { border-color: var(--success); }
-        .item-top { display: flex; align-items: center; justify-content: space-between; }
-        .photo-preview { width: 100%; border-radius: 10px; margin-top: 15px; display: none; border: 1px solid #475569; }
-        .take-btn { display: block; width: 100%; padding: 12px; background: var(--primary); color: white; text-align: center; border-radius: 10px; margin-top: 15px; cursor: pointer; font-weight: bold; }
-        .share-btn { width: 100%; padding: 16px; background: #25D366; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .preview { width: 100%; border-radius: 10px; margin-top: 10px; display: none; }
+        .btn { display: block; width: 100%; padding: 12px; background: var(--primary); color: white; border-radius: 10px; cursor: pointer; font-weight: bold; border: none; margin-top: 10px; }
+        .share { background: #25D366; font-size: 1.1rem; padding: 15px; }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>📸 Urban Quest</h1>
     <div class="card">
-        <input type="text" id="uname" placeholder="Explorer Name...">
+        <input type="text" id="uname" style="width:100%; padding:10px; border-radius:5px;" placeholder="Enter Name">
         <div class="timer" id="timer">00:00:00</div>
-        <div class="btns">
-            <button style="background:var(--success)" id="startB" onclick="tStart()">▶ Start</button>
-            <button style="background:var(--warning)" id="stopB" onclick="tStop()" disabled>⏹ Finish</button>
+        <div style="display:flex; gap:10px;">
+            <button class="btn" style="background:var(--success)" onclick="startT()">Start</button>
+            <button class="btn" style="background:#ef4444" onclick="stopT()">Finish</button>
         </div>
-        <div class="prog-bar"><div id="pfill" class="prog-fill"></div></div>
-        <p id="ptext" style="text-align:center; font-size:0.8rem; margin-top:5px;">Progress: 0/7</p>
+        <div class="prog-bar"><div id="pfill" class="fill"></div></div>
+        <div id="ptext">Progress: 0 / 7</div>
     </div>
 
-    <div class="item" id="it1"><div class="item-top"><span>🖥️ Digital Kiosk</span><span id="chk1">⭕</span></div><img id="img1" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="environment" onchange="processFile(this, 1)"></label></div>
-    <div class="item" id="it2"><div class="item-top"><span>🔌 Public USB</span><span id="chk2">⭕</span></div><img id="img2" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="environment" onchange="processFile(this, 2)"></label></div>
-    <div class="item" id="it3"><div class="item-top"><span>💳 Contactless Payment</span><span id="chk3">⭕</span></div><img id="img3" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="environment" onchange="processFile(this, 3)"></label></div>
-    <div class="item" id="it4"><div class="item-top"><span>📢 Outdoor Billboard</span><span id="chk4">⭕</span></div><img id="img4" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="environment" onchange="processFile(this, 4)"></label></div>
-    <div class="item" id="it5"><div class="item-top"><span>⏰ Selfie with Clock</span><span id="chk5">⭕</span></div><img id="img5" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="user" onchange="processFile(this, 5)"></label></div>
-    <div class="item" id="it6"><div class="item-top"><span>📶 Free WiFi</span><span id="chk6">⭕</span></div><img id="img6" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="environment" onchange="processFile(this, 6)"></label></div>
-    <div class="item" id="it7"><div class="item-top"><span>🛒 Grocery Barcode</span><span id="chk7">⭕</span></div><img id="img7" class="photo-preview"><label class="take-btn">📷 Snap Photo<input type="file" hidden accept="image/*" capture="environment" onchange="processFile(this, 7)"></label></div>
+    <div class="item" id="i1"><span>🖥️ Digital Kiosk</span><img id="v1" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="up(this,1)"></label></div>
+    <div class="item" id="i2"><span>🔌 Public USB</span><img id="v2" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="up(this,2)"></label></div>
+    <div class="item" id="i3"><span>💳 Contactless Payment</span><img id="v3" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="up(this,3)"></label></div>
+    <div class="item" id="i4"><span>📢 Outdoor Billboard</span><img id="v4" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="up(this,4)"></label></div>
+    <div class="item" id="i5"><span>⏰ Selfie with Clock</span><img id="v5" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="user" onchange="up(this,5)"></label></div>
+    <div class="item" id="i6"><span>📶 Free WiFi</span><img id="v6" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="up(this,6)"></label></div>
+    <div class="item" id="i7"><span>🛒 Grocery Barcode</span><img id="v7" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="up(this,7)"></label></div>
 
-    <button class="share-btn" onclick="sendWhatsApp()">📤 Share to WhatsApp</button>
+    <button class="btn share" onclick="wa()">📤 Share to WhatsApp</button>
 </div>
 
 <script>
-    let seconds = 0, timerInterval = null, itemsFound = new Set();
-
-    function tStart() {
-        if (timerInterval) return;
-        document.getElementById('timer').classList.add('on');
-        document.getElementById('startB').disabled = true;
-        document.getElementById('stopB').disabled = false;
-        timerInterval = setInterval(() => {
-            seconds++;
-            let h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-            let m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-            let s = (seconds % 60).toString().padStart(2, '0');
-            document.getElementById('timer').textContent = `${h}:${m}:${s}`;
-        }, 1000);
-    }
-
-    function tStop() {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        alert("Finish! Time: " + document.getElementById('timer').textContent);
-    }
-
-    function processFile(input, id) {
+    let s=0, t=null, f=new Set();
+    function startT() { if(!t) t=setInterval(()=>{s++; let d=new Date(s*1000).toISOString().substr(11,8); document.getElementById('timer').innerText=d;},1000); }
+    function stopT() { clearInterval(t); t=null; alert("Time: " + document.getElementById('timer').innerText); }
+    
+    function up(input, id) {
         if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                // Display the image
-                const imgDisplay = document.getElementById(`img${id}`);
-                imgDisplay.src = e.target.result;
-                imgDisplay.style.display = 'block';
-                
-                // Update UI and Tracking
-                document.getElementById(`it${id}`).classList.add('done');
-                document.getElementById(`chk${id}`).textContent = '✅';
-                itemsFound.add(id);
-                
-                // Update Progress Bar
-                const count = itemsFound.size;
-                document.getElementById('pfill').style.width = (count / 7 * 100) + '%';
-                document.getElementById('ptext').textContent = `Progress: ${count}/7`;
-            };
-            reader.readAsDataURL(input.files[0]);
+            let r = new FileReader();
+            r.onload = function(e) {
+                let img = document.getElementById('v'+id);
+                img.src = e.target.result;
+                img.style.display = 'block';
+                document.getElementById('i'+id).classList.add('done');
+                f.add(id);
+                document.getElementById('pfill').style.width = (f.size / 7 * 100) + '%';
+                document.getElementById('ptext').innerText = `Progress: ${f.size} / 7`;
+            }
+            r.readAsDataURL(input.files[0]);
         }
     }
 
-    function sendWhatsApp() {
-        const name = document.getElementById('uname').value || "Explorer";
-        const time = document.getElementById('timer').textContent;
-        const msg = `🎯 *Urban Quest Update!*\n👤 Name: ${name}\n⏱ Time: ${time}\n✅ Found: ${itemsFound.size}/7 items.`;
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+    function wa() {
+        let n = document.getElementById('uname').value || "Explorer";
+        let tm = document.getElementById('timer').innerText;
+        let txt = encodeURIComponent(`🎯 *Scavenger Hunt Update!*\n👤 Name: ${n}\n⏱ Time: ${tm}\n✅ Found: ${f.size}/7 items.`);
+        window.open(`https://api.whatsapp.com/send?text=${txt}`);
     }
 </script>
 </body>

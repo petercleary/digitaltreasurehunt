@@ -3,73 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scavenger Hunt Pro</title>
+    <title>Digital Scavenger Hunt</title>
     <style>
-        :root { --primary: #6366f1; --success: #22c55e; --bg: #0f172a; --card: #1e293b; }
-        body { font-family: sans-serif; background: var(--bg); color: #f8fafc; padding: 15px; margin: 0; }
-        .container { max-width: 500px; margin: 0 auto; }
-        .card { background: var(--card); border-radius: 15px; padding: 20px; margin-bottom: 15px; text-align: center; }
-        .timer { font-size: 2.5rem; font-family: monospace; margin: 10px 0; color: #94a3b8; }
-        .prog-bar { height: 12px; background: #334155; border-radius: 6px; overflow: hidden; margin: 10px 0; }
-        .fill { height: 100%; background: var(--primary); width: 0%; transition: 0.3s; }
-        .item { background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 2px solid transparent; }
-        .item.done { border-color: var(--success); }
-        .preview { width: 100%; border-radius: 10px; margin-top: 10px; display: none; }
-        .btn { display: block; width: 100%; padding: 12px; background: var(--primary); color: white; border-radius: 10px; cursor: pointer; font-weight: bold; border: none; margin-top: 10px; }
-        .share { background: #25D366; font-size: 1.1rem; padding: 15px; }
+        :root { --p: #667eea; --s: #4CAF50; --bg: #f0f2f5; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: var(--p); padding: 15px; }
+        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .timer { font-size: 2rem; text-align: center; font-family: monospace; margin: 10px 0; }
+        .bar { height: 10px; background: #ddd; border-radius: 5px; overflow: hidden; margin-bottom: 5px; }
+        .fill { height: 100%; background: var(--p); width: 0%; transition: 0.3s; }
+        .item { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 3px solid transparent; }
+        .item.done { border-color: var(--s); }
+        .btn { display: block; width: 100%; padding: 12px; background: var(--p); color: white; border-radius: 8px; border: none; font-weight: bold; text-align: center; cursor: pointer; text-decoration: none; }
+        img { width: 100%; border-radius: 8px; display: none; margin-top: 10px; border: 1px solid #ccc; }
+        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>📸 Urban Quest</h1>
-    <div class="card">
-        <input type="text" id="uname" style="width:100%; padding:10px; border-radius:5px;" placeholder="Enter Name">
-        <div class="timer" id="timer">00:00:00</div>
-        <div style="display:flex; gap:10px;">
-            <button class="btn" style="background:var(--success)" onclick="startT()">Start</button>
-            <button class="btn" style="background:#ef4444" onclick="stopT()">Finish</button>
+    <div style="max-width: 500px; margin: 0 auto;">
+        <h1 style="color:white; text-align:center; margin-bottom:15px;">📸 Urban Hunt</h1>
+        
+        <div class="card">
+            <input type="text" id="uname" placeholder="Your Name">
+            <div class="timer" id="timerDisplay">00:00:00</div>
+            <button class="btn" style="background:var(--s)" onclick="startTimer()">▶ Start Quest</button>
+            <div style="margin-top:15px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem;"><span>Progress</span><span id="progText">0/7</span></div>
+                <div class="bar"><div id="pbar" class="fill"></div></div>
+            </div>
         </div>
-        <div class="prog-bar"><div id="pfill" class="fill"></div></div>
-        <div id="ptext">Progress: 0 / 7</div>
+
+        <div id="hunt-items"></div>
+
+        <button class="btn" onclick="shareWhatsApp()" style="background:#25D366; margin-top:20px; font-size:1.1rem;">📤 Share to WhatsApp</button>
     </div>
 
-    <div class="item" id="i1"><span>🖥️ Digital Kiosk</span><img id="v1" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="up(this,1)"></label></div>
-    <div class="item" id="i2"><span>🔌 Public USB</span><img id="v2" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="up(this,2)"></label></div>
-    <div class="item" id="i3"><span>💳 Contactless Payment</span><img id="v3" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="up(this,3)"></label></div>
-    <div class="item" id="i4"><span>📢 Outdoor Billboard</span><img id="v4" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="up(this,4)"></label></div>
-    <div class="item" id="i5"><span>⏰ Selfie with Clock</span><img id="v5" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="user" onchange="up(this,5)"></label></div>
-    <div class="item" id="i6"><span>📶 Free WiFi</span><img id="v6" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="up(this,6)"></label></div>
-    <div class="item" id="i7"><span>🛒 Grocery Barcode</span><img id="v7" class="preview"><label class="btn">📷 Snap<input type="file" hidden accept="image/*" capture="environment" onchange="up(this,7)"></label></div>
-
-    <button class="btn share" onclick="wa()">📤 Share to WhatsApp</button>
-</div>
-
 <script>
-    let s=0, t=null, f=new Set();
-    function startT() { if(!t) t=setInterval(()=>{s++; let d=new Date(s*1000).toISOString().substr(11,8); document.getElementById('timer').innerText=d;},1000); }
-    function stopT() { clearInterval(t); t=null; alert("Time: " + document.getElementById('timer').innerText); }
+    // These items are pulled directly from your list
+    const items = [
+        "Digital Kiosk", 
+        "Public USB", 
+        "Contactless Payment", 
+        "Outdoor Billboard", 
+        "Selfie with a clock", 
+        "Free Wifi", 
+        "Grocery Item Barcode"
+    ];
     
-    function up(input, id) {
+    let seconds = 0, timer = null, found = new Set();
+
+    // Create the HTML for items
+    const container = document.getElementById('hunt-items');
+    items.forEach((name, i) => {
+        const id = i + 1;
+        container.innerHTML += `
+            <div class="item" id="card${id}">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <b>${name}</b>
+                    <span id="chk${id}">⭕</span>
+                </div>
+                <img id="img${id}">
+                <label class="btn" style="margin-top:10px;">📷 Take Photo
+                    <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(${id}, this)">
+                </label>
+            </div>`;
+    });
+
+    function startTimer() {
+        if (timer) return;
+        timer = setInterval(() => {
+            seconds++;
+            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').innerText = h + ":" + m + ":" + s;
+        }, 1000);
+    }
+
+    function handlePhoto(id, input) {
         if (input.files && input.files[0]) {
-            let r = new FileReader();
-            r.onload = function(e) {
-                let img = document.getElementById('v'+id);
-                img.src = e.target.result;
-                img.style.display = 'block';
-                document.getElementById('i'+id).classList.add('done');
-                f.add(id);
-                document.getElementById('pfill').style.width = (f.size / 7 * 100) + '%';
-                document.getElementById('ptext').innerText = `Progress: ${f.size} / 7`;
-            }
-            r.readAsDataURL(input.files[0]);
+            const file = input.files[0];
+            const imgElement = document.getElementById('img' + id);
+            
+            // This is the "Easy Way" fix for photo display
+            imgElement.src = URL.createObjectURL(file);
+            imgElement.style.display = 'block';
+            
+            // Record progress
+            document.getElementById('card' + id).classList.add('done');
+            document.getElementById('chk' + id).innerText = '✅';
+            found.add(id);
+            
+            // Update the UI
+            const total = items.length;
+            const count = found.size;
+            document.getElementById('pbar').style.width = (count / total * 100) + '%';
+            document.getElementById('progText').innerText = count + "/" + total;
         }
     }
 
-    function wa() {
-        let n = document.getElementById('uname').value || "Explorer";
-        let tm = document.getElementById('timer').innerText;
-        let txt = encodeURIComponent(`🎯 *Scavenger Hunt Update!*\n👤 Name: ${n}\n⏱ Time: ${tm}\n✅ Found: ${f.size}/7 items.`);
-        window.open(`https://api.whatsapp.com/send?text=${txt}`);
+    function shareWhatsApp() {
+        const name = document.getElementById('uname').value || "Explorer";
+        const time = document.getElementById('timerDisplay').innerText;
+        const msg = encodeURIComponent(`🎯 *Urban Quest Complete!*\n👤 Name: ${name}\n⏱ Time: ${time}\n✅ Found: ${found.size}/7 items found!`);
+        window.open("https://api.whatsapp.com/send?text=" + msg);
     }
 </script>
 </body>
